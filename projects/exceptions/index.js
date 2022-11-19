@@ -55,9 +55,7 @@ function isAllTrue(array, fn) {
    isSomeTrue([1, 2, 3, 4, 5], n => n > 20) // вернет false
  */
 function isSomeTrue(array, fn) {
-  if (!Array.isArray(array)) {
-    throw new Error('empty array');
-  } else if (array.length === 0) {
+  if (!Array.isArray(array) || array.length === 0) {
     throw new Error('empty array');
   } else if (typeof fn !== 'function') {
     throw new Error('fn is not a function');
@@ -125,31 +123,19 @@ function calculator(number = 0) {
   }
   return {
     sum(...args) {
-      for (const arg of args) {
-        number += arg;
-      }
-      return number;
+      return args.reduce((sum, arg) => sum + arg, number);
     },
     dif(...args) {
-      for (const arg of args) {
-        number -= arg;
-      }
-      return number;
+      return args.reduce((dif, arg) => dif - arg, number);
     },
     div(...args) {
-      for (const arg of args) {
-        if (arg === 0) {
-          throw new Error('division by 0');
-        }
-        number /= arg;
+      if (args.includes(0)) {
+        throw new Error('division by 0');
       }
-      return number;
+      return args.reduce((div, arg) => div / arg, number);
     },
     mul(...args) {
-      for (const arg of args) {
-        number *= arg;
-      }
-      return number;
+      return args.reduce((mul, arg) => mul * arg, number);
     },
   };
 }
