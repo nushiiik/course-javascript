@@ -30,29 +30,9 @@
  */
 
 import './towns.html';
+import { loadAndSortTowns } from './functions';
 
 const homeworkContainer = document.querySelector('#app');
-
-/*
- Функция должна вернуть Promise, который должен быть разрешен с массивом городов в качестве значения
-
- Массив городов пожно получить отправив асинхронный запрос по адресу
- https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
- */
-function loadTowns() {}
-
-/*
- Функция должна проверять встречается ли подстрока chunk в строке full
- Проверка должна происходить без учета регистра символов
-
- Пример:
-   isMatching('Moscow', 'moscow') // true
-   isMatching('Moscow', 'mosc') // true
-   isMatching('Moscow', 'cow') // true
-   isMatching('Moscow', 'SCO') // true
-   isMatching('Moscow', 'Moscov') // false
- */
-function isMatching(full, chunk) {}
 
 /* Блок с надписью "Загрузка" */
 const loadingBlock = homeworkContainer.querySelector('#loading-block');
@@ -67,8 +47,70 @@ const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
 
-retryButton.addEventListener('click', () => {});
+/*
+ Функция должна вернуть Promise, который должен быть разрешен с массивом городов в качестве значения
 
-filterInput.addEventListener('input', function () {});
+ Массив городов пожно получить отправив асинхронный запрос по адресу
+ https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
+ */
+function loadTowns() {
+  return loadAndSortTowns();
+}
+
+/*
+   Функция должна проверять встречается ли подстрока chunk в строке full
+   Проверка должна происходить без учета регистра символов
+
+   Пример:
+     isMatching('Moscow', 'moscow') // true
+     isMatching('Moscow', 'mosc') // true
+     isMatching('Moscow', 'cow') // true
+     isMatching('Moscow', 'SCO') // true
+     isMatching('Moscow', 'Moscov') // false
+   */
+function isMatching(full, chunk) {
+  return full.toLowerCase().indexOf(chunk.toLowerCase()) !== -1;
+}
+
+let cities = [];
+
+retryButton.addEventListener('click', () => {
+  tryToLoad();
+});
+
+filterInput.addEventListener('input', function () {
+  updateFilter(this.value);
+});
+
+loadingFailedBlock.classList.add('hidden');
+filterBlock.classList.add('hidden');
+
+async function tryToLoad() {
+  try {
+    cities = await loadTowns();
+    loadingBlock.classList.add('hidden');
+    loadingFailedBlock.classList.add('hidden');
+    filterBlock.classList.remove('hidden');
+  } catch (e) {
+    loadingBlock.classList.add('hidden');
+    loadingFailedBlock.classList.remove('hidden');
+  }
+}
+
+function updateFilter(filterValue) {
+  filterResult.innerHTML = '';
+  const fragment = document.createDocumentFragment();
+
+  for (const city of cities) {
+    if (filterValue && isMatching(city.name, filterValue)) {
+      const cityDiv = document.createElement('div');
+      cityDiv.textContent = city.name;
+      fragment.append(cityDiv);
+    }
+  }
+  filterResult.append(fragment);
+}
+
+tryToLoad();
 
 export { loadTowns, isMatching };
