@@ -45,8 +45,87 @@ const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
-filterNameInput.addEventListener('input', function () {});
+const cookies = getCookies();
+let filterValue = '';
+updateTable();
 
-addButton.addEventListener('click', () => {});
+function getCookies() {
+  return document.cookie
+    .split('; ')
+    .filter(Boolean)
+    .map((cookie) => cookie.match(/^([^=]+)=(.+)/))
+    .reduce((obj, [, name, value]) => {
+      obj.set(name, value);
+      return obj;
+    }, new Map());
+}
 
-listTable.addEventListener('click', (e) => {});
+filterNameInput.addEventListener('input', function () {
+  filterValue = this.value;
+  updateTable();
+});
+
+addButton.addEventListener('click', () => {
+  const name = encodeURIComponent(addNameInput.value.trim());
+  const value = encodeURIComponent(addValueInput.value.trim());
+
+  if (!name) {
+    return;
+  }
+
+  document.cookie = `${name}=${value}`;
+  cookies.set(name, value);
+
+  updateTable();
+});
+
+listTable.addEventListener('click', (e) => {
+  const { role, cookieName } = e.target.dataset;
+
+  if (role === 'remove-cookie') {
+    cookies.delete(cookieName);
+    document.cookie = `${cookieName}=deleted; max-age=0`;
+    updateTable();
+  }
+});
+
+function updateTable() {
+  const fragment = document.createDocumentFragment();
+  let total = 0;
+  listTable.innerHTML = '';
+
+  for (const [name, value] of cookies) {
+    if (
+      filterValue &&
+      !name.toLowerCase().includes(filterValue.toLowerCase()) &&
+      !value.toLowerCase().includes(filterValue.toLowerCase())
+    ) {
+      continue;
+    }
+
+    total++;
+
+    const tr = document.createElement('tr');
+    const tdName = document.createElement('td');
+    const tdValue = document.createElement('td');
+    const tdRemove = document.createElement('td');
+    const buttonRemove = document.createElement('button');
+
+    buttonRemove.dataset.role = 'remove-cookie';
+    buttonRemove.dataset.cookieName = name;
+    buttonRemove.textContent = 'Удалить';
+    tdName.textContent = name;
+    tdValue.textContent = value;
+    tr.append(tdName, tdValue, tdRemove);
+    tdRemove.append(buttonRemove);
+
+    fragment.append(tr);
+  }
+
+  if (total) {
+    listTable.parentNode.classList.remove('hidden');
+    listTable.append(fragment);
+  } else {
+    listTable.parentNode.classList.add('hidden');
+  }
+}
