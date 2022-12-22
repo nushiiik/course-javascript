@@ -10,7 +10,7 @@ import WSClient from './wsClient.js';
 export default class Chat {
   constructor() {
     this.wsClient = new WSClient(
-      `ws://${location.host}/chat/ws`,
+      `ws://localhost:8282/chat/ws`,
       this.onMessage.bind(this)
     );
 
@@ -39,7 +39,7 @@ export default class Chat {
   onUpload(data) {
     this.ui.userPhoto.set(data);
 
-    fetch('chat/upload-photo', {
+    fetch('http://localhost:8282/chat/upload-photo', {
       method: 'post',
       body: JSON.stringify({
         name: this.ui.userName.get(),
@@ -59,7 +59,7 @@ export default class Chat {
     this.ui.loginWindow.hide();
     this.ui.mainWindow.show();
     this.ui.userName.set(name);
-    this.ui.userPhoto.set(`/chat/photos/${name}.png?t=${Date.now()}`);
+    this.ui.userPhoto.set(`http:/localhost:8282/chat/photos/${name}.png?t=${Date.now()}`);
   }
 
   onMessage({ type, from, data }) {
@@ -83,9 +83,9 @@ export default class Chat {
       );
 
       for (const avatar of avatars) {
-        avatar.style.backgroundImage = `url(/chat/photos/${
+        avatar.style.backgroundImage = `http:/localhost:8282/chat/photos/${
           data.name
-        }.png?t=${Date.now()})`;
+        }.png?t=${Date.now()}`;
       }
     }
   }

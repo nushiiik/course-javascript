@@ -1,7 +1,9 @@
 const http = require('http');
 const { Server } = require('ws');
+const path = require('path');
+const fs = require('fs');
 
-/*function readBody(req) {
+function readBody(req) {
   return new Promise((resolve, reject) => {
     let dataRaw = '';
 
@@ -9,11 +11,11 @@ const { Server } = require('ws');
     req.on('error', reject);
     req.on('end', () => resolve(JSON.parse(dataRaw)));
   });
-}*/
+}
 
 const server = http.createServer(async (req, res) => {
   try {
-    /*if (/\/photos\/.+\.png/.test(req.url)) {
+    if (/\/photos\/.+\.png/.test(req.url)) {
       const [, imageName] = req.url.match(/\/photos\/(.+\.png)/) || [];
       const fallBackPath = path.resolve(__dirname, '../avatar.jpeg');
       const filePath = path.resolve(__dirname, '../photos', imageName);
@@ -37,7 +39,7 @@ const server = http.createServer(async (req, res) => {
         return res.end('fail');
       }
     }
-*/
+
     res.end('ok');
   } catch (e) {
     console.error(e);
@@ -80,11 +82,11 @@ function sendMessageTo(message, to) {
   to.send(JSON.stringify(message));
 }
 
-/*function broadcast(connections, message) {
+function broadcast(connections, message) {
   for (const connection of connections.keys()) {
     connection.send(JSON.stringify(message));
   }
-}*/
+}
 
 function sendMessageFrom(connections, message, from, excludeSelf) {
   const socketData = connections.get(from);
@@ -104,4 +106,6 @@ function sendMessageFrom(connections, message, from, excludeSelf) {
   }
 }
 
-server.listen(8282);
+server.listen(8282, () => {
+  console.log('Server work!');
+});
